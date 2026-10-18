@@ -32,7 +32,10 @@ jobs:
         run: |
           unzip -q jarvis-assistant.zip
           rm -f jarvis-assistant/local.properties
-          ls jarvis-assistant
+          cd jarvis-assistant
+          touch gradle.properties
+          grep -q "android.useAndroidX" gradle.properties || echo "android.useAndroidX=true" >> gradle.properties
+          ls
 
       - name: Install Gradle 8.7
         run: |
