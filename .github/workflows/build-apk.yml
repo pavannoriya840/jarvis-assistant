@@ -1,0 +1,44 @@
+name: Build Jarvis APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Unzip project sources
+        run: |
+          unzip -q jarvis-assistant.zip
+          rm -f jarvis-assistant/local.properties
+          ls jarvis-assistant
+
+      - name: Install Gradle 8.7
+        run: |
+          curl -sL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.7-bin.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "/tmp/gradle-8.7/bin" >> $GITHUB_PATH
+
+      - name: Build debug APK
+        run: |
+          cd jarvis-assistant
+          gradle assembleDebug --console=plain
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-apk
+          path: jarvis-assistant/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
